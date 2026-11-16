@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { useDocumentVisibility } from './use-document-visibility';
 
@@ -16,6 +17,24 @@ describe('@mantine/hooks/use-document-visibility', () => {
   it('returns visible as the initial state', () => {
     const { result } = renderHook(() => useDocumentVisibility());
     expect(result.current).toBe('visible');
+  });
+
+  it('returns hidden on the first render when the document is hidden', () => {
+    setVisibilityState('hidden');
+    const renders: DocumentVisibilityState[] = [];
+    const effects: DocumentVisibilityState[] = [];
+
+    renderHook(() => {
+      const visibility = useDocumentVisibility();
+      renders.push(visibility);
+      useEffect(() => {
+        effects.push(visibility);
+      }, [visibility]);
+      return visibility;
+    });
+
+    expect(renders[0]).toBe('hidden');
+    expect(effects).toEqual(['hidden']);
   });
 
   it('updates to hidden when visibilitychange fires', () => {
